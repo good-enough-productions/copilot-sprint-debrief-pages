@@ -1,0 +1,2118 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="light dark">
+<title>Copilot Sprint Debrief</title>
+<style>
+:root {
+  --nav-h: 58px;
+  --toc-w: 250px;
+}
+
+[data-theme="light"] {
+  --bg: #f6f0e3;
+  --bg-accent: #efe2c4;
+  --surface: rgba(255, 251, 243, 0.9);
+  --surface-2: #fffaf1;
+  --surface-3: #f1e7d3;
+  --text: #1f2c33;
+  --muted: #5d6b72;
+  --line: #d7c9aa;
+  --ink: #153447;
+  --teal: #0d7c70;
+  --gold: #b2750b;
+  --red: #a14c38;
+  --shadow: 0 18px 40px rgba(43, 31, 14, 0.12);
+  --note: #fff8ea;
+  --code: #efe7d6;
+}
+
+[data-theme="dark"] {
+  --bg: #14181b;
+  --bg-accent: #1b2528;
+  --surface: rgba(24, 31, 35, 0.9);
+  --surface-2: #182026;
+  --surface-3: #233038;
+  --text: #edf4f0;
+  --muted: #9eb0b2;
+  --line: #314146;
+  --ink: #99d4ff;
+  --teal: #63d4c2;
+  --gold: #f2c46b;
+  --red: #f0a088;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.34);
+  --note: #1d262b;
+  --code: #10161a;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: "Aptos", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(13, 124, 112, 0.14), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(178, 117, 11, 0.12), transparent 22%),
+    linear-gradient(180deg, var(--bg-accent), var(--bg));
+  line-height: 1.6;
+}
+
+a { color: var(--ink); }
+a:hover { color: var(--teal); }
+button, input, textarea, select { font: inherit; }
+
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--nav-h);
+  padding: 0 16px;
+  backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  border-bottom: 1px solid var(--line);
+}
+
+.menu-btn, .toolbar-btn, .action-btn, .mini-btn, .filter-btn {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: transform .15s ease, border-color .15s ease, background .15s ease;
+}
+
+.menu-btn:hover, .toolbar-btn:hover, .action-btn:hover, .mini-btn:hover, .filter-btn:hover,
+.menu-btn:focus-visible, .toolbar-btn:focus-visible, .action-btn:focus-visible, .mini-btn:focus-visible, .filter-btn:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--ink);
+  outline: none;
+}
+
+.menu-btn { display: none; }
+.topbar-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+}
+
+.topbar-sub {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+  padding-top: var(--nav-h);
+}
+
+.toc {
+  width: var(--toc-w);
+  flex-shrink: 0;
+  position: sticky;
+  top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  padding: 22px 14px;
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+.toc-group { margin-bottom: 22px; }
+.toc-label {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+  padding: 0 8px;
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.toc-list a {
+  display: block;
+  text-decoration: none;
+  color: var(--muted);
+  padding: 8px 10px;
+  border-radius: 10px;
+  border-left: 3px solid transparent;
+}
+
+.toc-list a:hover,
+.toc-list a.active {
+  color: var(--text);
+  background: var(--surface-3);
+  border-left-color: var(--ink);
+}
+
+.sidebar-note {
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--note);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+  max-width: 1200px;
+  padding: 34px 34px 96px;
+}
+
+.hero {
+  padding: 26px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--ink) 12%, transparent), transparent 55%),
+    linear-gradient(160deg, color-mix(in srgb, var(--gold) 9%, transparent), transparent 62%),
+    var(--surface);
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.35fr .95fr;
+  gap: 18px;
+}
+
+.hero h1 {
+  margin: 0 0 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(34px, 4.8vw, 54px);
+  line-height: 1.02;
+  letter-spacing: -1.4px;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted);
+  max-width: 760px;
+}
+
+.pill-row, .chip-row, .filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pill, .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stat-card, .card, .callout, .note-box, .pending-card, .launch-card, .command-card, .glossary-card, .highlight-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.stat-card {
+  padding: 16px;
+}
+
+.stat-label {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  margin-top: 6px;
+}
+
+.stat-sub {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.section {
+  margin-top: 34px;
+  scroll-margin-top: calc(var(--nav-h) + 18px);
+}
+
+.section-over {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.section h2 {
+  margin: 0 0 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(26px, 3.3vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -1px;
+}
+
+.section-lead {
+  color: var(--muted);
+  margin: 0 0 18px;
+  max-width: 780px;
+}
+
+.grid-2, .grid-3, .deliverable-grid, .launch-grid, .command-grid, .glossary-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.deliverable-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.launch-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.command-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.glossary-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+.card {
+  padding: 18px;
+}
+
+.card h3, .launch-card h3, .command-card h3, .pending-card h3, .glossary-card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.card p, .launch-card p, .command-card p, .pending-card p, .glossary-card p, .callout p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.callout {
+  padding: 16px 18px;
+  margin-top: 14px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--teal) 9%, var(--surface)), var(--surface));
+}
+
+.callout strong { color: var(--text); }
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+}
+
+.compare-table th,
+.compare-table td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+
+.compare-table th {
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface-3);
+}
+
+.compare-table td { background: var(--surface); }
+.compare-table tr:last-child td { border-bottom: none; }
+
+.wave-list {
+  display: grid;
+  gap: 14px;
+}
+
+.wave {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.wave summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+
+.wave summary::-webkit-details-marker { display: none; }
+.wave-title { font-size: 19px; font-weight: 700; }
+.wave-sub { color: var(--muted); font-size: 14px; }
+.wave-body { padding: 0 18px 18px; }
+
+.search-row {
+  display: grid;
+  grid-template-columns: 1.4fr auto;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.search-row input, .note-box textarea, .editable-surface, .highlight-note {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 13px 14px;
+}
+
+.search-row input:focus, .note-box textarea:focus, .editable-surface:focus, .highlight-note:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.filter-btn.active,
+.pin-btn.active {
+  background: var(--surface-3);
+  border-color: var(--ink);
+  color: var(--text);
+}
+
+.deliverable-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card-top,
+.card-meta,
+.card-actions,
+.file-list,
+.pending-actions,
+.launch-actions,
+.command-actions,
+.highlight-actions,
+.notes-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.badge.ok { color: var(--teal); border-color: color-mix(in srgb, var(--teal) 54%, var(--line)); }
+.badge.warn { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 54%, var(--line)); }
+.badge.stop { color: var(--red); border-color: color-mix(in srgb, var(--red) 54%, var(--line)); }
+.badge.ink { color: var(--ink); border-color: color-mix(in srgb, var(--ink) 50%, var(--line)); }
+
+.card-title {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.eli5 {
+  padding: 12px 14px;
+  background: var(--note);
+  border-radius: 14px;
+  border: 1px solid var(--line);
+}
+
+.eli5 strong, .fact strong { color: var(--text); }
+.fact {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+}
+
+.file-chip:hover { border-color: var(--ink); }
+
+.launch-card, .command-card, .pending-card, .glossary-card, .note-box, .highlight-card {
+  padding: 18px;
+}
+
+.path-box, .command-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--code);
+  border: 1px solid var(--line);
+  font-family: Consolas, "Cascadia Code", monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.note-box textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+.editable-surface {
+  min-height: 200px;
+  resize: vertical;
+}
+
+.editable-surface[contenteditable="true"] {
+  white-space: pre-wrap;
+}
+
+.pinned-list, .highlight-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pinned-empty, .highlight-empty, .search-empty {
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  background: var(--surface-2);
+}
+
+.highlight-text {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+}
+
+.footer-note {
+  margin-top: 28px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.hosted-banner {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--note);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.hosted-banner strong {
+  color: var(--text);
+}
+
+.hosted-copy [data-action="open-file"],
+.hosted-copy [data-action="open-folder"],
+.hosted-copy [data-action="open-file-system"],
+.hosted-copy [data-action="copy-path"] {
+  display: none !important;
+}
+
+.hidden { display: none !important; }
+
+.selection-menu,
+.selection-editor {
+  position: fixed;
+  z-index: 140;
+  width: min(340px, calc(100vw - 24px));
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.selection-menu {
+  width: auto;
+  min-width: 180px;
+  padding: 8px;
+}
+
+.selection-menu .notes-actions {
+  justify-content: stretch;
+}
+
+.selection-menu .mini-btn,
+.selection-editor .mini-btn,
+.selection-editor .action-btn {
+  flex: 1;
+  justify-content: center;
+}
+
+.selection-editor {
+  padding: 16px;
+}
+
+.selection-editor h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.selection-preview {
+  margin-bottom: 12px;
+  padding: 12px 13px;
+  border-radius: 14px;
+  background: var(--note);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+}
+
+.selection-editor textarea {
+  width: 100%;
+  min-height: 130px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 13px;
+  resize: vertical;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.selection-editor textarea:focus {
+  outline: none;
+  border-color: var(--ink);
+}
+
+@media (max-width: 1140px) {
+  :root { --toc-w: 210px; }
+  .hero-grid { grid-template-columns: 1fr; }
+  .search-row { grid-template-columns: 1fr; }
+  .main { padding: 28px 24px 92px; }
+}
+
+@media (max-width: 860px) {
+  :root { --toc-w: 172px; }
+  .topbar-sub { display: none; }
+  .toc {
+    padding: 18px 10px;
+  }
+  .toc-label {
+    font-size: 10px;
+    padding: 0 6px;
+  }
+  .toc-list a {
+    font-size: 11.5px;
+    padding: 7px 8px;
+  }
+  .sidebar-note { display: none; }
+}
+
+@media (max-width: 680px) {
+  .menu-btn { display: inline-flex; }
+  .toc {
+    position: fixed;
+    left: 0;
+    transform: translateX(-100%);
+    transition: transform .18s ease;
+    z-index: 90;
+    box-shadow: var(--shadow);
+  }
+  .toc.open { transform: translateX(0); }
+}
+
+@media (max-width: 720px) {
+  .main { padding: 22px 16px 80px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 520px) {
+  .stats, .grid-2, .grid-3, .deliverable-grid, .launch-grid, .command-grid, .glossary-grid, .note-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">Menu</button>
+  <div>
+    <div class="topbar-title">Copilot Sprint Debrief</div>
+    <div class="topbar-sub">ELI5 recap, verified outputs, workspace launchpad, and a living note layer</div>
+  </div>
+  <div class="topbar-right">
+    <button class="toolbar-btn" id="saveSelectionBtn">Save Selected Text</button>
+    <button class="toolbar-btn" id="copySummaryBtn">Copy Markdown Summary</button>
+    <button class="toolbar-btn" id="themeBtn">Dark Theme</button>
+  </div>
+</header>
+
+<div class="app">
+  <aside class="toc" id="toc">
+    <div class="toc-group">
+      <div class="toc-label">Overview</div>
+      <ul class="toc-list">
+        <li><a href="#story" class="active">What happened</a></li>
+        <li><a href="#before-after">Before and after</a></li>
+        <li><a href="#method">How we did it</a></li>
+      </ul>
+    </div>
+    <div class="toc-group">
+      <div class="toc-label">Outputs</div>
+      <ul class="toc-list">
+        <li><a href="#deliverables">Deliverable explorer</a></li>
+        <li><a href="#reality-check">Reality check</a></li>
+        <li><a href="#choices">Choices made</a></li>
+      </ul>
+    </div>
+    <div class="toc-group">
+      <div class="toc-label">Continue</div>
+      <ul class="toc-list">
+        <li><a href="#launchpad">Workspace launchpad</a></li>
+        <li><a href="#commands">Commands to run</a></li>
+        <li><a href="#notes">Notes and highlights</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-note">
+      This page reconstructs the sprint from the visible chat plus file checks on disk. One local session log existed, but it only exposed session headers, not the full turn text.
+    </div>
+  </aside>
+
+  <main class="main">
+    <section class="hero">
+      <div class="hero-grid">
+        <div>
+          <h1>You used a credit sprint to spray useful scaffolding across both workspaces.</h1>
+          <p>The short version: you started with a huge, messy, idea-rich workspace and told Copilot to move fast. The result was not one polished app. It was a wide foundation layer: cleaned docs, YAML frontmatter, improvement plans, launch scripts, search prototypes, infrastructure starters, and a few real code entry points. This page exists so you can understand that burst without hunting through dozens of folders.</p>
+          <div class="pill-row" style="margin-top: 18px;">
+            <span class="pill">2 workspaces touched</span>
+            <span class="pill">5 major agent waves</span>
+            <span class="pill">25 direct file outputs tracked</span>
+            <span class="pill">3 script-generated outputs still pending</span>
+          </div>
+          <div class="hosted-banner">
+            <strong>Hosted copy note:</strong> this Pages version keeps the explanations, search, highlights, and notes, but hides your local desktop paths and disables local file-launch actions. Use the desktop copy for direct VS Code and file-system jumps.
+          </div>
+        </div>
+        <div class="stats" id="statsGrid">
+          <article class="stat-card">
+            <div class="stat-label">Tracked Deliverable Groups</div>
+            <div class="stat-value" id="statGroups">18</div>
+            <div class="stat-sub">Grouped so the recap stays readable.</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-label">Files Touched</div>
+            <div class="stat-value" id="statFiles">25</div>
+            <div class="stat-sub">Direct creates or edits found during review.</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-label">Runnable Scripts</div>
+            <div class="stat-value" id="statScripts">7</div>
+            <div class="stat-sub">Helpers you can execute to keep moving.</div>
+          </article>
+          <article class="stat-card">
+            <div class="stat-label">Pending Outputs</div>
+            <div class="stat-value" id="statPending">3</div>
+            <div class="stat-sub">Expected after running scripts, not present yet.</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="story">
+      <div class="section-over">Section 01</div>
+      <h2>What happened, in plain English</h2>
+      <p class="section-lead">You had expiring Copilot credits and chose breadth over depth. Instead of asking for one careful refactor, you used multiple agent waves to plant infrastructure across the workspace: better docs, starter UIs, scripts, plans, and code skeletons that future work can build on.</p>
+      <div class="grid-3">
+        <article class="card">
+          <h3>Previous state</h3>
+          <p>You already had a rich ecosystem of folders, markdown exports, HTML artifacts, scripts, and project ideas. What was missing was coordination: many useful pieces existed, but they were hard to browse, compare, or continue.</p>
+        </article>
+        <article class="card">
+          <h3>New state</h3>
+          <p>You now have a workspace map, project improvement plans, starter deployment files, a Gemini client wrapper, a conductor CLI mock, search-oriented HTML artifacts, and several scripts that can generate even more structure when you run them.</p>
+        </article>
+        <article class="card">
+          <h3>Core tradeoff</h3>
+          <p>We chose speed and coverage. That means many outputs are useful first versions, not fully integrated finished systems. Some are immediately usable. Others are launch pads waiting for one more command.</p>
+        </article>
+      </div>
+      <div class="callout">
+        <p><strong>ELI5:</strong> Think of this sprint like laying out labeled bins, starter tools, and checklists across a workshop. We did not build every final machine. We made the shop easier to understand and faster to work in next time.</p>
+      </div>
+    </section>
+
+    <section class="section" id="before-after">
+      <div class="section-over">Section 02</div>
+      <h2>Before and after</h2>
+      <p class="section-lead">This table is the fastest way to understand what changed in the workspace.</p>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Area</th>
+            <th>Before</th>
+            <th>After</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Artifacts</td>
+            <td>Useful HTML and markdown already existed, but some docs were rough, some notes lacked structure, and there was no session recap artifact.</td>
+            <td>Docs were cleaned up, YAML was added, navigation got small improvements, and this debrief artifact now explains the sprint in one place.</td>
+          </tr>
+          <tr>
+            <td>DB Toolkit</td>
+            <td>Gemini exports and tab CSVs existed, but browsing them required manual digging and there was no cohesive search or recovery layer.</td>
+            <td>You now have a knowledge dashboard, a mock global search UI, a tabs gallery, and a converter script that can turn CSV exports into markdown notes.</td>
+          </tr>
+          <tr>
+            <td>Project planning</td>
+            <td>Projects like vibe-lab, Link-Scraper-Pipeline, and home-server-setup had context but not sprint-generated improvement docs.</td>
+            <td>Each now has a dedicated improvement plan describing what to change, how to change it, and why it matters.</td>
+          </tr>
+          <tr>
+            <td>Workspace navigation</td>
+            <td>There was no master map tying the top-level folders together.</td>
+            <td>The root README now acts as a lightweight codebase atlas, and the knowledge index script can generate a bigger markdown map when you run it.</td>
+          </tr>
+          <tr>
+            <td>Automation</td>
+            <td>Some standalone scripts existed, but there was no sprint-created family of helper tools for indexing, formatting, scaffolding, transcript digesting, and tab conversion.</td>
+            <td>You now have several runnable helper scripts, plus a CLI mock and an API wrapper to extend later.</td>
+          </tr>
+          <tr>
+            <td>Infrastructure</td>
+            <td>Home-server ideas existed, but there was not yet a sprint-generated architecture doc plus compose starter in the reviewed folder.</td>
+            <td>You now have an architecture draft, a compose starter for Portainer/Uptime Kuma/cloudflared, and a deploy wrapper script.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section" id="method">
+      <div class="section-over">Section 03</div>
+      <h2>How we did it</h2>
+      <p class="section-lead">The method mattered as much as the output. The whole sprint was optimized for rapid coverage.</p>
+      <div class="wave-list">
+        <details class="wave" open>
+          <summary>
+            <div>
+              <div class="wave-title">Wave 1: Fast cleanup and first documentation</div>
+              <div class="wave-sub">Artifacts were cleaned, frontmatter was added, a dashboard was created, and three project improvement plans were written.</div>
+            </div>
+            <span class="badge ink">Breadth-first</span>
+          </summary>
+          <div class="wave-body">
+            <div class="grid-3">
+              <article class="card">
+                <h3>Why start here</h3>
+                <p>These changes are cheap, visible, and immediately useful. They make future work easier without needing full builds or deployments.</p>
+              </article>
+              <article class="card">
+                <h3>What changed</h3>
+                <p>Markdown was restructured, YAML was added to exports, a DB Toolkit dashboard appeared, and three improvement plans gave future-you a roadmap.</p>
+              </article>
+              <article class="card">
+                <h3>What we did not do</h3>
+                <p>We did not fully integrate those plans into CI, deployment, or tests. This wave mainly improved clarity and discoverability.</p>
+              </article>
+            </div>
+          </div>
+        </details>
+        <details class="wave">
+          <summary>
+            <div>
+              <div class="wave-title">Wave 2: Scaffolds and browse layers</div>
+              <div class="wave-sub">A project scaffolder, a knowledge-index generator, and a tab recovery HTML artifact were added.</div>
+            </div>
+            <span class="badge ink">Developer flow</span>
+          </summary>
+          <div class="wave-body">
+            <p class="fact"><strong>ELI5:</strong> This wave created the molds that help you spin up future work faster and find old work faster.</p>
+          </div>
+        </details>
+        <details class="wave">
+          <summary>
+            <div>
+              <div class="wave-title">Wave 3: Organization and maintenance</div>
+              <div class="wave-sub">A root workspace map, a Python formatting script, and a transcript digest generator landed.</div>
+            </div>
+            <span class="badge ink">Maintenance</span>
+          </summary>
+          <div class="wave-body">
+            <p class="fact"><strong>Why it matters:</strong> This wave reduced future overhead. It was about making the workspace easier to keep clean and easier to scan.</p>
+          </div>
+        </details>
+        <details class="wave">
+          <summary>
+            <div>
+              <div class="wave-title">Wave 4: More retrieval, more docs</div>
+              <div class="wave-sub">A mock global search UI, a home-server architecture draft, and a tabs-to-markdown script were added.</div>
+            </div>
+            <span class="badge ink">Knowledge retrieval</span>
+          </summary>
+          <div class="wave-body">
+            <p class="fact"><strong>Tradeoff:</strong> The search page is a UI shell with placeholder data, not a real index yet. That was intentional: build the interface first, wire data second.</p>
+          </div>
+        </details>
+        <details class="wave">
+          <summary>
+            <div>
+              <div class="wave-title">Wave 5: Real code entry points</div>
+              <div class="wave-sub">A Docker compose starter, deploy script, Gemini API wrapper, and conductor CLI mock were written.</div>
+            </div>
+            <span class="badge ink">Code surface</span>
+          </summary>
+          <div class="wave-body">
+            <p class="fact"><strong>Big picture:</strong> This final wave moved beyond docs and UI scaffolds into code that future work can directly extend.</p>
+          </div>
+        </details>
+      </div>
+      <div class="callout">
+        <p><strong>Important note:</strong> During this review, the available local session log only showed session starts. The detailed recap below therefore comes from the visible conversation history plus verification of the files that now exist on disk.</p>
+      </div>
+    </section>
+
+    <section class="section" id="deliverables">
+      <div class="section-over">Section 04</div>
+      <h2>Deliverable explorer</h2>
+      <p class="section-lead">Search here when you remember a vague idea like â€œwe built some tab thingâ€ or â€œthere was a home-server file somewhere.â€ Each card explains the output in plain English, why it exists, and how to open it.</p>
+      <div class="search-row">
+        <input type="search" id="deliverableSearch" placeholder="Search deliverables, folders, tags, or file names">
+        <div class="filters" id="areaFilters"></div>
+      </div>
+      <div class="deliverable-grid" id="deliverableGrid"></div>
+      <div class="search-empty hidden" id="deliverableEmpty">Nothing matched that search. Try a folder name like DB Toolkit, home server, conductor, or scripts.</div>
+    </section>
+
+    <section class="section" id="reality-check">
+      <div class="section-over">Section 05</div>
+      <h2>Reality check</h2>
+      <p class="section-lead">This is the honest status layer. It tells you what exists now, what is only a scaffold, and what still requires a manual run.</p>
+      <div class="grid-2">
+        <article class="card">
+          <h3>What is solid right now</h3>
+          <p>Most of the big-ticket outputs are present on disk: the workspace README, the improvement plans, the scaffolder, the tabs gallery, the global search page, the architecture doc, the compose starter, the Gemini client, and the conductor CLI.</p>
+        </article>
+        <article class="card">
+          <h3>What is intentionally incomplete</h3>
+          <p>Some pieces are starter shells by design. The global search page uses mock data. The conductor CLI prints mock status text. The architecture doc is a draft. The scripts below still need to be run before their generated outputs appear.</p>
+        </article>
+      </div>
+      <div class="grid-3" id="pendingGrid"></div>
+      <div class="callout">
+        <p><strong>One specific nuance:</strong> the architecture markdown includes a Mermaid section, but it was authored as an inline code fence rather than a standard triple-backtick fenced block. Treat it as a draft doc that may need a small markdown cleanup before every renderer shows the diagram correctly.</p>
+      </div>
+    </section>
+
+    <section class="section" id="choices">
+      <div class="section-over">Section 06</div>
+      <h2>Choices we made, and choices we did not make</h2>
+      <p class="section-lead">This matters because it explains why the sprint feels wide rather than deep.</p>
+      <div class="grid-2">
+        <article class="card">
+          <h3>Choices we made</h3>
+          <div class="chip-row" style="margin-bottom: 10px;">
+            <span class="chip">Parallel agent waves</span>
+            <span class="chip">Scaffolds before polish</span>
+            <span class="chip">Docs and discoverability first</span>
+            <span class="chip">Local files over backend services</span>
+          </div>
+          <p>We optimized for visible progress, reusable starting points, and knowledge capture. That is why many outputs are guides, starter UIs, scripts, and wrappers instead of deeply integrated apps.</p>
+        </article>
+        <article class="card">
+          <h3>Choices we did not make</h3>
+          <div class="chip-row" style="margin-bottom: 10px;">
+            <span class="chip">No full end-to-end test pass</span>
+            <span class="chip">No real search indexing backend</span>
+            <span class="chip">No live deploy</span>
+            <span class="chip">No execution of every generator script</span>
+          </div>
+          <p>We did not spend the sprint on validation-heavy work, production secrets, deep data wiring, or backend services. That was the cost of going fast.</p>
+        </article>
+      </div>
+      <div class="grid-3" style="margin-top: 16px;">
+        <article class="card">
+          <h3>Why that was reasonable</h3>
+          <p>Expiring credits pushed the strategy toward maximum surface area. In that context, generating assets that future-you can refine was rational.</p>
+        </article>
+        <article class="card">
+          <h3>What follow-up would tighten it up</h3>
+          <p>Run the generator scripts, wire the search UIs to real manifests, fix the Mermaid fence, and replace mock CLI output with real agent state.</p>
+        </article>
+        <article class="card">
+          <h3>What to keep from this method</h3>
+          <p>Using bursts of parallel agents for documentation, planning, and scaffolding worked well. It is especially strong when the workspace is broad and under-documented.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="launchpad">
+      <div class="section-over">Section 07</div>
+      <h2>Workspace launchpad</h2>
+      <p class="section-lead">Use these cards to jump straight into the folders most affected by the sprint.</p>
+      <div class="launch-grid" id="launchGrid"></div>
+    </section>
+
+    <section class="section" id="commands">
+      <div class="section-over">Section 08</div>
+      <h2>Commands to run next</h2>
+      <p class="section-lead">These are the highest-leverage commands because they turn â€œscripts were writtenâ€ into â€œoutputs now exist.â€</p>
+      <div class="command-grid" id="commandGrid"></div>
+      <div class="glossary-grid" style="margin-top: 18px;" id="glossaryGrid"></div>
+    </section>
+
+    <section class="section" id="notes">
+      <div class="section-over">Section 09</div>
+      <h2>Notes, highlights, and editable recap</h2>
+      <p class="section-lead">Everything below is local-first. It saves in your browser storage on this machine. Use it as the handoff layer for future-you.</p>
+      <div class="note-grid">
+        <article class="note-box">
+          <h3>My short recap</h3>
+          <div class="editable-surface" id="rewriteSurface" contenteditable="true"></div>
+          <div class="notes-actions" style="margin-top: 10px;">
+            <button class="mini-btn" id="resetRecapBtn">Reset to default recap</button>
+          </div>
+        </article>
+        <article class="note-box">
+          <h3>Questions or loose ends</h3>
+          <textarea id="questionsNote" placeholder="What feels unclear? What should be verified next?"></textarea>
+        </article>
+        <article class="note-box">
+          <h3>Next actions</h3>
+          <textarea id="nextActionsNote" placeholder="List the first follow-up steps you actually want to do."></textarea>
+        </article>
+      </div>
+      <div class="grid-2" style="margin-top: 16px;">
+        <article class="note-box">
+          <h3>Pinned deliverables</h3>
+          <div class="pinned-list" id="pinnedList"></div>
+        </article>
+        <article class="note-box">
+          <h3>Saved highlights</h3>
+          <div class="highlight-list" id="highlightList"></div>
+        </article>
+      </div>
+      <p class="footer-note">Tip: select text in the page body and you will get a floating action menu. You can also right-click the selection to open a quick â€œAdd noteâ€ workflow.</p>
+    </section>
+  </main>
+</div>
+
+<div class="selection-menu hidden" id="selectionMenu" role="menu" aria-label="Selection actions">
+  <div class="notes-actions">
+    <button class="mini-btn" data-action="selection-add-note">Add note</button>
+    <button class="mini-btn" data-action="selection-save-highlight">Save highlight</button>
+  </div>
+</div>
+
+<div class="selection-editor hidden" id="selectionEditor" aria-live="polite">
+  <h3>Add note to selection</h3>
+  <div class="selection-preview" id="selectionPreview"></div>
+  <textarea id="selectionNoteInput" placeholder="Why does this matter? What should future-you remember?"></textarea>
+  <div class="notes-actions" style="margin-top: 12px;">
+    <button class="action-btn" id="saveSelectionNoteBtn">Save note</button>
+    <button class="mini-btn" id="cancelSelectionNoteBtn">Cancel</button>
+  </div>
+</div>
+
+<script>
+const defaultRecap = `We used a fast Copilot sprint to spread useful structure across both workspaces. The big wins were: cleaned docs, YAML frontmatter on key notes, a DB Toolkit dashboard, project improvement plans, a project scaffolder, a knowledge-index generator, tab-recovery UIs, a root workspace map, maintenance scripts, home-server docs plus compose starter files, a Gemini wrapper, and a conductor CLI mock. The main follow-up is to run the generator scripts and replace the mock layers with real data.`;
+
+const deliverables = [
+  {
+    id: 'artifacts-js-explained',
+    area: 'Artifacts',
+    wave: 'Wave 1',
+    status: 'Updated',
+    tone: 'ok',
+    type: 'Doc cleanup',
+    count: 1,
+    title: 'React explainer rebuilt into real markdown',
+    eli5: 'A messy note became a readable cheat sheet with frontmatter and a clean structure.',
+    summary: 'The file now clearly explains Vite, Next.js, Remix, Astro, and Reflex, along with when each fits your world.',
+    why: 'This turned a rough note into a usable decision aid for future project prompts.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['react', 'frontmatter', 'artifacts', 'frameworks'],
+    files: [
+      { label: 'javascript_explained.md', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'artifacts-markdown-breakdown',
+    area: 'Artifacts',
+    wave: 'Wave 1',
+    status: 'Updated',
+    tone: 'ok',
+    type: 'Doc cleanup',
+    count: 1,
+    title: 'markdown-breakdown.md got metadata and structure',
+    eli5: 'Another note was made easier to scan and categorize.',
+    summary: 'Frontmatter was added and the core pieces were reorganized into a cleaner markdown structure.',
+    why: 'Small structure fixes compound over time in a knowledge-heavy workspace.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['markdown', 'frontmatter', 'artifacts'],
+    files: [
+      { label: 'markdown-breakdown.md', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'artifacts-db-hub',
+    area: 'Artifacts',
+    wave: 'Wave 1',
+    status: 'Updated',
+    tone: 'ok',
+    type: 'UI polish',
+    count: 1,
+    title: 'db-toolkit-hub.html got navigation polish',
+    eli5: 'The DB Toolkit hub became a little easier to read and click through.',
+    summary: 'The sidebar links were upgraded with clearer labels and icon-style cues.',
+    why: 'Fast scanning matters in a folder full of artifacts.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['html', 'navigation', 'db toolkit'],
+    files: [
+      { label: 'db-toolkit-hub.html', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'dbtoolkit-frontmatter-batch',
+    area: 'DB Toolkit',
+    wave: 'Wave 1',
+    status: 'Updated',
+    tone: 'ok',
+    type: 'Metadata pass',
+    count: 5,
+    title: 'Five Gemini export notes got YAML frontmatter',
+    eli5: 'Five raw conversation exports got labels, dates, and tags so they act more like real notes.',
+    summary: 'The batch included AI orchestration, prompt library, Android automation, phone debugging, and Gemini pipeline notes.',
+    why: 'Structured metadata makes search, filtering, and future pipelines much easier.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['yaml', 'gemini exports', 'metadata', 'db toolkit'],
+    files: [
+      { label: 'AI Agent Orchestration Frameworks', path: 'Local desktop path hidden in public copy' },
+      { label: 'AI Training and Prompt Library', path: 'Local desktop path hidden in public copy' },
+      { label: 'Android Automation From Scripts to Agents', path: 'Local desktop path hidden in public copy' },
+      { label: 'Android Development Phone Debugging Workflow', path: 'Local desktop path hidden in public copy' },
+      { label: 'Automating Gemini Apps for Knowledge Pipelines', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'dbtoolkit-dashboard',
+    area: 'DB Toolkit',
+    wave: 'Wave 1',
+    status: 'Created',
+    tone: 'ok',
+    type: 'Dashboard',
+    count: 1,
+    title: 'DB Toolkit knowledge dashboard',
+    eli5: 'A simple homepage now summarizes a few important notes instead of making you open each markdown file cold.',
+    summary: 'The new index page shows a card-based dashboard for selected knowledge topics.',
+    why: 'Reading-first browsing is faster than folder spelunking.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['dashboard', 'db toolkit', 'html'],
+    files: [
+      { label: 'DB_Toolkit/index.html', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'project-plans',
+    area: 'Projects',
+    wave: 'Wave 1',
+    status: 'Created',
+    tone: 'ok',
+    type: 'Improvement plans',
+    count: 3,
+    title: 'Three projects got improvement plans',
+    eli5: 'Three folders now have a written â€œwhat to do next and whyâ€ guide.',
+    summary: 'The sprint created plans for Link-Scraper-Pipeline, home-server-setup, and vibe-lab.',
+    why: 'These plans convert vague â€œwe should improve this sometimeâ€ energy into concrete next moves.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['planning', 'roadmap', 'projects'],
+    files: [
+      { label: 'Link-Scraper-Pipeline plan', path: 'Local desktop path hidden in public copy' },
+      { label: 'home-server-setup plan', path: 'Local desktop path hidden in public copy' },
+      { label: 'vibe-lab plan', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'project-scaffolder',
+    area: 'Projects',
+    wave: 'Wave 2',
+    status: 'Created',
+    tone: 'ok',
+    type: 'Scaffolder',
+    count: 1,
+    title: 'Interactive vibe project scaffolder',
+    eli5: 'You now have a starter script that asks what kind of project you want, then lays out the folder skeleton.',
+    summary: 'The PowerShell script supports Vite/React, Next.js, and Python/Reflex with a custom README for each path.',
+    why: 'This removes startup friction when you want to turn an idea into a folder quickly.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['scaffold', 'powershell', 'starter'],
+    files: [
+      { label: 'scaffold-vibe-project.ps1', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'knowledge-index-script',
+    area: 'Scripts',
+    wave: 'Wave 2',
+    status: 'Created',
+    tone: 'warn',
+    type: 'Generator script',
+    count: 1,
+    title: 'Workspace knowledge-index generator',
+    eli5: 'This script can build one giant markdown index of all the notes in the workspace, but it still needs to be run.',
+    summary: 'It recursively finds markdown files, pulls a title from frontmatter or H1, groups them by folder, and writes KNOWLEDGE_BASE.md.',
+    why: 'This is the bridge from scattered notes to a single browseable markdown map.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['python', 'knowledge base', 'index'],
+    files: [
+      { label: 'generate_knowledge_index.py', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'tabs-gallery',
+    area: 'DB Toolkit',
+    wave: 'Wave 2',
+    status: 'Created',
+    tone: 'ok',
+    type: 'UI artifact',
+    count: 1,
+    title: 'Tabs gallery for CSV session recovery',
+    eli5: 'Upload tab export CSVs and see them as grouped cards instead of spreadsheet rows.',
+    summary: 'The page parses CSV client-side, groups tabs by window, and lets you search the recovered set.',
+    why: 'Browser sessions are easier to recover from a visual gallery than from raw CSV files.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['tabs', 'csv', 'ui'],
+    files: [
+      { label: 'tabs-gallery.html', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'workspace-map',
+    area: 'Projects',
+    wave: 'Wave 3',
+    status: 'Created',
+    tone: 'ok',
+    type: 'Workspace map',
+    count: 1,
+    title: 'Root README became a map of the codebase',
+    eli5: 'The workspace finally got a front door sign explaining what the big folders probably do.',
+    summary: 'The generated README labels major directories and gives each a short purpose statement.',
+    why: 'A big workspace becomes friendlier the moment it has a top-level map.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['readme', 'map', 'workspace'],
+    files: [
+      { label: 'README.md', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'format-lint-script',
+    area: 'Scripts',
+    wave: 'Wave 3',
+    status: 'Created',
+    tone: 'ok',
+    type: 'Maintenance script',
+    count: 1,
+    title: 'Workspace Python formatter and linter script',
+    eli5: 'One PowerShell command can now install and run Black, isort, and flake8 across your Python files.',
+    summary: 'The script is designed to sweep the workspace while ignoring virtual environment clutter.',
+    why: 'You needed a quick janitor for Python-heavy folders.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['powershell', 'lint', 'format'],
+    files: [
+      { label: 'format-and-lint.ps1', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'transcript-digest-script',
+    area: 'Projects',
+    wave: 'Wave 3',
+    status: 'Created',
+    tone: 'warn',
+    type: 'Generator script',
+    count: 1,
+    title: 'Transcript digest generator',
+    eli5: 'This script can squeeze lots of transcript files into one digest file, but it has not been run yet.',
+    summary: 'It looks for executive summaries or falls back to the first 300 words from each transcript file.',
+    why: 'Long transcript folders become much easier to scan when summarized into one digest.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['transcripts', 'python', 'digest'],
+    files: [
+      { label: 'extract-insights.py', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'global-search-ui',
+    area: 'DB Toolkit',
+    wave: 'Wave 4',
+    status: 'Created',
+    tone: 'warn',
+    type: 'Search scaffold',
+    count: 1,
+    title: 'Global search UI shell for Gemini exports',
+    eli5: 'You now have the search page shape, but it still runs on placeholder data.',
+    summary: 'The HTML artifact includes a search box, result cards, and a mock data array ready to be replaced with real content.',
+    why: 'The interface was built first so the data wiring has a target to plug into later.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['search', 'mock data', 'html'],
+    files: [
+      { label: 'global-search.html', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'architecture-doc',
+    area: 'Projects',
+    wave: 'Wave 4',
+    status: 'Created',
+    tone: 'warn',
+    type: 'Architecture draft',
+    count: 1,
+    title: 'Home-server architecture draft',
+    eli5: 'The folder got a high-level map of how Cloudflare, Proxmox, Docker, and monitoring should fit together.',
+    summary: 'It explains the intended stack and includes a Mermaid-style diagram draft.',
+    why: 'Architecture writing helps keep infrastructure changes coherent instead of purely improvised.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['architecture', 'home server', 'mermaid'],
+    files: [
+      { label: 'ARCHITECTURE.md', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'tabs-to-md-script',
+    area: 'DB Toolkit',
+    wave: 'Wave 4',
+    status: 'Created',
+    tone: 'warn',
+    type: 'Generator script',
+    count: 1,
+    title: 'Tabs CSV to markdown converter',
+    eli5: 'This script can turn tab export rows into separate markdown notes, but those notes have not been generated yet.',
+    summary: 'It is meant to sanitize titles, preserve URLs in frontmatter, and write the results into a tabs_markdown folder.',
+    why: 'This closes the gap between browser exports and your markdown-based knowledge workflow.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['tabs', 'markdown', 'python'],
+    files: [
+      { label: 'convert_tabs_to_md.py', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'compose-stack',
+    area: 'Projects',
+    wave: 'Wave 5',
+    status: 'Created',
+    tone: 'ok',
+    type: 'Infrastructure starter',
+    count: 2,
+    title: 'Home-server compose starter plus deploy wrapper',
+    eli5: 'You now have a starter stack for Portainer, Uptime Kuma, and cloudflared, plus a script to bring it up.',
+    summary: 'The compose file defines the services and volumes, and deploy.ps1 wraps the pull and up steps.',
+    why: 'This turns architecture ideas into something much closer to runnable infrastructure.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['docker', 'deploy', 'home server'],
+    files: [
+      { label: 'docker-compose.yml', path: 'Local desktop path hidden in public copy' },
+      { label: 'deploy.ps1', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'gemini-wrapper',
+    area: 'Projects',
+    wave: 'Wave 5',
+    status: 'Created',
+    tone: 'ok',
+    type: 'API wrapper',
+    count: 1,
+    title: 'Gemini API wrapper for Link-Scraper-Pipeline',
+    eli5: 'The scraper pipeline now has a reusable Python class for talking to Gemini with retries and JSON parsing.',
+    summary: 'It supports environment-based API keys, exponential backoff, and a helper for structured JSON extraction.',
+    why: 'This is one of the most directly reusable code outputs from the sprint.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['gemini', 'python', 'api'],
+    files: [
+      { label: 'gemini_client.py', path: 'Local desktop path hidden in public copy' }
+    ]
+  },
+  {
+    id: 'conductor-cli',
+    area: 'Projects',
+    wave: 'Wave 5',
+    status: 'Created',
+    tone: 'warn',
+    type: 'CLI scaffold',
+    count: 1,
+    title: 'Conductor CLI management shell',
+    eli5: 'There is now a command-line shape for starting, stopping, checking, and deploying agents, but it still returns mock messages.',
+    summary: 'The script uses argparse and defines start, stop, status, and deploy subcommands.',
+    why: 'This gives the conductor folder a real entry point to evolve from.',
+    primaryPath: 'Local desktop path hidden in public copy',
+    folderPath: 'Local desktop path hidden in public copy',
+    tags: ['cli', 'argparse', 'agents'],
+    files: [
+      { label: 'conductor_cli.py', path: 'Local desktop path hidden in public copy' }
+    ]
+  }
+];
+
+const pendingOutputs = [
+  {
+    title: 'KNOWLEDGE_BASE.md is not present yet',
+    why: 'The generator script exists, but the workspace-wide markdown index has not been generated.',
+    expected: 'Local desktop path hidden in public copy',
+    command: 'python "Local desktop path hidden in public copy"'
+  },
+  {
+    title: 'TRANSCRIPT_DIGEST.md is not present yet',
+    why: 'The transcript summary script exists, but it has not been run inside cloud podcast transcripts.',
+    expected: 'Local desktop path hidden in public copy',
+    command: 'python "Local desktop path hidden in public copy"'
+  },
+  {
+    title: 'tabs_markdown output folder is not present yet',
+    why: 'The converter script exists, but the CSV exports have not yet been turned into markdown notes.',
+    expected: 'Local desktop path hidden in public copy',
+    command: 'python "Local desktop path hidden in public copy"'
+  }
+];
+
+const launchTargets = [
+  {
+    title: 'New folder root',
+    description: 'Best starting point when you want the overall workspace map and the folders touched by the sprint.',
+    path: 'Local desktop path hidden in public copy'
+  },
+  {
+    title: 'Artifacts folder',
+    description: 'Open here for the HTML artifact collection, cleaned docs, and this debrief page.',
+    path: 'Local desktop path hidden in public copy'
+  },
+  {
+    title: 'DB_Toolkit root',
+    description: 'Open here for dashboards, tab tools, and Gemini export browsing scaffolds.',
+    path: 'Local desktop path hidden in public copy'
+  },
+  {
+    title: 'home-server-setup',
+    description: 'Architecture draft, improvement plan, compose starter, and deploy script live here.',
+    path: 'Local desktop path hidden in public copy'
+  },
+  {
+    title: 'Link-Scraper-Pipeline',
+    description: 'Contains the improvement plan and the new Gemini client wrapper.',
+    path: 'Local desktop path hidden in public copy'
+  },
+  {
+    title: 'conductor',
+    description: 'Open here to inspect the conductor CLI scaffold.',
+    path: 'Local desktop path hidden in public copy'
+  },
+  {
+    title: 'scripts',
+    description: 'This folder holds the knowledge index and Python formatting helpers.',
+    path: 'Local desktop path hidden in public copy'
+  },
+  {
+    title: 'New project start point',
+    description: 'The interactive scaffolder lives here for new project spin-up.',
+    path: 'Local desktop path hidden in public copy'
+  },
+  {
+    title: 'cloud podcast transcripts',
+    description: 'This is where the transcript digest script is waiting to be run.',
+    path: 'Local desktop path hidden in public copy'
+  }
+];
+
+const commandDeck = [
+  {
+    title: 'Generate the workspace markdown index',
+    description: 'Creates KNOWLEDGE_BASE.md at the root of New folder.',
+    command: 'python "Local desktop path hidden in public copy"'
+  },
+  {
+    title: 'Run the Python formatter and linter sweep',
+    description: 'Installs or updates Black, isort, and flake8, then runs them.',
+    command: '.\\format-and-lint.ps1'
+  },
+  {
+    title: 'Generate transcript digest output',
+    description: 'Builds TRANSCRIPT_DIGEST.md from transcript files.',
+    command: 'python "Local desktop path hidden in public copy"'
+  },
+  {
+    title: 'Convert tab CSV exports into markdown files',
+    description: 'Creates per-tab markdown notes under tabs_markdown.',
+    command: 'python "Local desktop path hidden in public copy"'
+  },
+  {
+    title: 'Inspect the conductor CLI help',
+    description: 'Useful first check before turning the mock CLI into a real one.',
+    command: 'python "Local desktop path hidden in public copy" --help'
+  },
+  {
+    title: 'Deploy the home-server starter stack',
+    description: 'Run this from home-server-setup after setting your tunnel token.',
+    command: '.\\deploy.ps1'
+  }
+];
+
+const glossary = [
+  {
+    title: 'Frontmatter',
+    body: 'A small metadata block at the top of a markdown file. Think of it as a label maker for notes.'
+  },
+  {
+    title: 'Scaffold',
+    body: 'A starter structure. It saves setup time but usually still needs wiring and real data.'
+  },
+  {
+    title: 'Artifact',
+    body: 'In this workspace, a standalone HTML file that acts like a mini app or interactive document.'
+  },
+  {
+    title: 'Generator script',
+    body: 'A script that writes another file or folder when you run it. The script can exist even if the generated output does not yet.'
+  }
+];
+
+const storageKey = 'copilotSprintDebriefStateV1';
+const isHostedCopy = true;
+let currentFilter = 'All';
+let state = loadState();
+let selectionDraft = null;
+
+function loadState() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(storageKey) || '{}');
+    return {
+      theme: parsed.theme || 'light',
+      recap: parsed.recap || defaultRecap,
+      questions: parsed.questions || '',
+      nextActions: parsed.nextActions || '',
+      highlights: Array.isArray(parsed.highlights) ? parsed.highlights : [],
+      pinned: Array.isArray(parsed.pinned) ? parsed.pinned : []
+    };
+  } catch (error) {
+    return {
+      theme: 'light',
+      recap: defaultRecap,
+      questions: '',
+      nextActions: '',
+      highlights: [],
+      pinned: []
+    };
+  }
+}
+
+function saveState() {
+  localStorage.setItem(storageKey, JSON.stringify(state));
+}
+
+function selectionData() {
+  const selection = window.getSelection();
+  if (!selection || selection.isCollapsed || !selection.rangeCount) {
+    return null;
+  }
+  const text = selection.toString().trim().replace(/\s+/g, ' ');
+  if (!text) {
+    return null;
+  }
+  const range = selection.getRangeAt(0);
+  const anchorNode = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+    ? range.commonAncestorContainer
+    : range.commonAncestorContainer.parentElement;
+  if (!anchorNode || !anchorNode.closest('.main')) {
+    return null;
+  }
+  const rect = range.getBoundingClientRect();
+  return {
+    text,
+    rect,
+    x: rect.left + (rect.width / 2),
+    y: rect.top - 10
+  };
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function placeFloatingElement(element, x, y) {
+  const padding = 12;
+  const width = element.offsetWidth;
+  const height = element.offsetHeight;
+  const left = clamp(x - (width / 2), padding, window.innerWidth - width - padding);
+  const top = clamp(y, 72, window.innerHeight - height - padding);
+  element.style.left = `${left}px`;
+  element.style.top = `${top}px`;
+}
+
+function hideSelectionMenu() {
+  document.getElementById('selectionMenu').classList.add('hidden');
+}
+
+function hideSelectionEditor() {
+  document.getElementById('selectionEditor').classList.add('hidden');
+}
+
+function hideSelectionUi() {
+  hideSelectionMenu();
+  hideSelectionEditor();
+  selectionDraft = null;
+}
+
+function createHighlight(text, note = '') {
+  if (!text) {
+    return;
+  }
+  state.highlights.unshift({
+    id: crypto.randomUUID(),
+    text,
+    note
+  });
+  saveState();
+  renderHighlights();
+}
+
+function showSelectionMenuAt(x, y) {
+  const data = selectionData();
+  if (!data) {
+    hideSelectionUi();
+    return;
+  }
+  selectionDraft = data;
+  const menu = document.getElementById('selectionMenu');
+  menu.classList.remove('hidden');
+  hideSelectionEditor();
+  requestAnimationFrame(() => {
+    placeFloatingElement(menu, x ?? data.x, y ?? Math.max(data.y - menu.offsetHeight, 72));
+  });
+}
+
+function showSelectionEditor() {
+  const data = selectionDraft || selectionData();
+  if (!data) {
+    hideSelectionUi();
+    return;
+  }
+  selectionDraft = data;
+  const editor = document.getElementById('selectionEditor');
+  const input = document.getElementById('selectionNoteInput');
+  document.getElementById('selectionPreview').textContent = data.text;
+  input.value = '';
+  editor.classList.remove('hidden');
+  hideSelectionMenu();
+  requestAnimationFrame(() => {
+    placeFloatingElement(editor, data.x, data.rect.bottom + 14);
+    input.focus();
+  });
+}
+
+function setTheme(theme) {
+  state.theme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeBtn').textContent = theme === 'light' ? 'Dark Theme' : 'Light Theme';
+  saveState();
+}
+
+function buildVsCodeHref(path) {
+  return 'vscode-insiders://file/' + encodeURI(path.replace(/\\/g, '/'));
+}
+
+function buildFileHref(path) {
+  return 'file:///' + encodeURI(path.replace(/\\/g, '/'));
+}
+
+function copyText(text, button) {
+  navigator.clipboard.writeText(text).then(() => {
+    if (!button) return;
+    const original = button.textContent;
+    button.textContent = 'Copied';
+    setTimeout(() => {
+      button.textContent = original;
+    }, 1200);
+  }).catch(() => {
+    if (button) {
+      button.textContent = 'Copy failed';
+      setTimeout(() => {
+        button.textContent = 'Copy';
+      }, 1200);
+    }
+  });
+}
+
+function renderFilters() {
+  const filters = ['All', ...new Set(deliverables.map(item => item.area))];
+  const container = document.getElementById('areaFilters');
+  container.innerHTML = filters.map(filter => `
+    <button class="filter-btn ${filter === currentFilter ? 'active' : ''}" data-filter="${filter}">${filter}</button>
+  `).join('');
+}
+
+function cardTemplate(item) {
+  return `
+    <article class="card deliverable-card" data-search="${[item.title, item.eli5, item.summary, item.why, item.area, item.wave, item.type, item.status, ...item.tags, ...item.files.map(file => file.label)].join(' ').toLowerCase()}" data-area="${item.area}">
+      <div class="card-top">
+        <div class="card-meta">
+          <span class="badge ink">${item.wave}</span>
+          <span class="badge">${item.area}</span>
+          <span class="badge ${item.tone}">${item.status}</span>
+          <span class="badge">${item.type}</span>
+          <span class="badge">${item.count} file${item.count > 1 ? 's' : ''}</span>
+        </div>
+      </div>
+      <div class="card-title">${item.title}</div>
+      <div class="eli5"><strong>ELI5:</strong> ${item.eli5}</div>
+      <p class="fact"><strong>What changed:</strong> ${item.summary}</p>
+      <p class="fact"><strong>Why it exists:</strong> ${item.why}</p>
+      <div class="file-list">
+        ${item.files.map(file => `
+          <button class="file-chip" data-action="open-file" data-path="${file.path}">${file.label}</button>
+        `).join('')}
+      </div>
+      <div class="card-actions">
+        <button class="action-btn" data-action="open-file" data-path="${item.primaryPath}">Open primary file</button>
+        <button class="action-btn" data-action="open-folder" data-path="${item.folderPath}">Open folder</button>
+        <button class="action-btn" data-action="copy-path" data-path="${item.primaryPath}">Copy path</button>
+        <button class="action-btn pin-btn ${state.pinned.includes(item.id) ? 'active' : ''}" data-action="pin" data-id="${item.id}">${state.pinned.includes(item.id) ? 'Pinned' : 'Pin'}</button>
+      </div>
+    </article>
+  `;
+}
+
+function renderDeliverables() {
+  const grid = document.getElementById('deliverableGrid');
+  const empty = document.getElementById('deliverableEmpty');
+  const query = document.getElementById('deliverableSearch').value.trim().toLowerCase();
+  const filtered = deliverables.filter(item => {
+    const matchesFilter = currentFilter === 'All' || item.area === currentFilter;
+    const haystack = [item.title, item.eli5, item.summary, item.why, item.area, item.wave, item.type, item.status, ...item.tags, ...item.files.map(file => file.label)].join(' ').toLowerCase();
+    const matchesQuery = !query || haystack.includes(query);
+    return matchesFilter && matchesQuery;
+  });
+  grid.innerHTML = filtered.map(cardTemplate).join('');
+  empty.classList.toggle('hidden', filtered.length !== 0);
+  renderPinned();
+}
+
+function renderPending() {
+  const grid = document.getElementById('pendingGrid');
+  grid.innerHTML = pendingOutputs.map(item => `
+    <article class="pending-card">
+      <div class="card-meta" style="margin-bottom: 8px;">
+        <span class="badge warn">Pending output</span>
+      </div>
+      <h3>${item.title}</h3>
+      <p>${item.why}</p>
+      <div class="path-box">Expected path: ${item.expected}</div>
+      <div class="command-box">${item.command}</div>
+      <div class="pending-actions" style="margin-top: 12px;">
+        <button class="action-btn" data-action="copy-command" data-command="${item.command.replace(/"/g, '&quot;')}">Copy command</button>
+        <button class="action-btn" data-action="copy-path" data-path="${item.expected}">Copy expected path</button>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderLaunchpad() {
+  const grid = document.getElementById('launchGrid');
+  grid.innerHTML = launchTargets.map(item => `
+    <article class="launch-card">
+      <h3>${item.title}</h3>
+      <p>${item.description}</p>
+      <div class="path-box">${item.path}</div>
+      <div class="launch-actions" style="margin-top: 12px;">
+        <button class="action-btn" data-action="open-folder" data-path="${item.path}">Open in VS Code</button>
+        <button class="action-btn" data-action="open-file-system" data-path="${item.path}">Open in file system</button>
+        <button class="action-btn" data-action="copy-path" data-path="${item.path}">Copy path</button>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderCommands() {
+  const grid = document.getElementById('commandGrid');
+  grid.innerHTML = commandDeck.map(item => `
+    <article class="command-card">
+      <h3>${item.title}</h3>
+      <p>${item.description}</p>
+      <div class="command-box">${item.command}</div>
+      <div class="command-actions" style="margin-top: 12px;">
+        <button class="action-btn" data-action="copy-command" data-command="${item.command.replace(/"/g, '&quot;')}">Copy command</button>
+      </div>
+    </article>
+  `).join('');
+
+  const glossaryGrid = document.getElementById('glossaryGrid');
+  glossaryGrid.innerHTML = glossary.map(item => `
+    <article class="glossary-card">
+      <h3>${item.title}</h3>
+      <p>${item.body}</p>
+    </article>
+  `).join('');
+}
+
+function renderPinned() {
+  const container = document.getElementById('pinnedList');
+  const pinnedItems = deliverables.filter(item => state.pinned.includes(item.id));
+  if (pinnedItems.length === 0) {
+    container.innerHTML = '<div class="pinned-empty">Pin a deliverable card to keep it here for quick return visits.</div>';
+    return;
+  }
+  container.innerHTML = pinnedItems.map(item => `
+    <article class="highlight-card">
+      <div class="card-meta" style="margin-bottom: 8px;">
+        <span class="badge">${item.area}</span>
+        <span class="badge ink">${item.wave}</span>
+      </div>
+      <h3>${item.title}</h3>
+      <p>${item.eli5}</p>
+      <div class="highlight-actions" style="margin-top: 12px;">
+        <button class="action-btn" data-action="open-file" data-path="${item.primaryPath}">Open</button>
+        <button class="action-btn" data-action="pin" data-id="${item.id}">Unpin</button>
+      </div>
+    </article>
+  `).join('');
+}
+
+function renderHighlights() {
+  const container = document.getElementById('highlightList');
+  if (state.highlights.length === 0) {
+    container.innerHTML = '<div class="highlight-empty">Select text in the page and use the floating menu or right-click flow to save it here.</div>';
+    return;
+  }
+  container.innerHTML = state.highlights.map(item => `
+    <article class="highlight-card" data-highlight-id="${item.id}">
+      <div class="highlight-text">${escapeHtml(item.text)}</div>
+      <textarea class="highlight-note" data-action="update-highlight-note" data-id="${item.id}" placeholder="Why did you save this?">${escapeHtml(item.note || '')}</textarea>
+      <div class="highlight-actions" style="margin-top: 10px;">
+        <span class="badge">Saved highlight</span>
+        <button class="action-btn" data-action="delete-highlight" data-id="${item.id}">Delete</button>
+      </div>
+    </article>
+  `).join('');
+}
+
+function escapeHtml(text) {
+  return String(text)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function togglePin(id) {
+  if (state.pinned.includes(id)) {
+    state.pinned = state.pinned.filter(item => item !== id);
+  } else {
+    state.pinned.push(id);
+  }
+  saveState();
+  renderFilters();
+  renderDeliverables();
+}
+
+function addHighlightFromSelection() {
+  const data = selectionDraft || selectionData();
+  if (!data) {
+    alert('Select some text on the page first.');
+    return;
+  }
+  createHighlight(data.text, '');
+  selectionDraft = null;
+  hideSelectionUi();
+}
+
+function copyMarkdownSummary() {
+  const pinnedTitles = deliverables.filter(item => state.pinned.includes(item.id)).map(item => `- ${item.title}`).join('\n') || '- None pinned yet';
+  const markdown = [
+    '# Copilot Sprint Debrief',
+    '',
+    '## Plain-English recap',
+    state.recap || defaultRecap,
+    '',
+    '## Questions or loose ends',
+    state.questions || 'None yet.',
+    '',
+    '## Next actions',
+    state.nextActions || 'None yet.',
+    '',
+    '## Pinned deliverables',
+    pinnedTitles,
+    '',
+    '## Saved highlights',
+    state.highlights.length ? state.highlights.map(item => `- ${item.text}${item.note ? ` | Note: ${item.note}` : ''}`).join('\n') : '- None yet.'
+  ].join('\n');
+  copyText(markdown, document.getElementById('copySummaryBtn'));
+}
+
+function openPath(kind, path) {
+  if (isHostedCopy || !path || path.includes('hidden in public copy')) {
+    alert('Desktop launch actions are disabled in the public GitHub Pages copy. Use the local artifact on your machine for file and folder jumps.');
+    return;
+  }
+  if (kind === 'vscode') {
+    window.location.href = buildVsCodeHref(path);
+    return;
+  }
+  window.location.href = buildFileHref(path);
+}
+
+function hydrateNotes() {
+  document.getElementById('rewriteSurface').textContent = state.recap || defaultRecap;
+  document.getElementById('questionsNote').value = state.questions;
+  document.getElementById('nextActionsNote').value = state.nextActions;
+}
+
+function updateStats() {
+  const totalFiles = deliverables.reduce((sum, item) => sum + item.count, 0);
+  const totalScripts = deliverables.filter(item => item.type.toLowerCase().includes('script') || item.type.toLowerCase().includes('scaffolder') || item.type.toLowerCase().includes('cli')).length;
+  document.getElementById('statGroups').textContent = String(deliverables.length);
+  document.getElementById('statFiles').textContent = String(totalFiles);
+  document.getElementById('statScripts').textContent = String(totalScripts);
+  document.getElementById('statPending').textContent = String(pendingOutputs.length);
+}
+
+function bindEvents() {
+  document.getElementById('themeBtn').addEventListener('click', () => {
+    setTheme(state.theme === 'light' ? 'dark' : 'light');
+  });
+
+  document.getElementById('deliverableSearch').addEventListener('input', renderDeliverables);
+  document.getElementById('saveSelectionBtn').addEventListener('click', addHighlightFromSelection);
+  document.getElementById('copySummaryBtn').addEventListener('click', copyMarkdownSummary);
+  document.getElementById('saveSelectionNoteBtn').addEventListener('click', () => {
+    const data = selectionDraft || selectionData();
+    if (!data) {
+      hideSelectionUi();
+      return;
+    }
+    createHighlight(data.text, document.getElementById('selectionNoteInput').value.trim());
+    selectionDraft = null;
+    window.getSelection()?.removeAllRanges();
+    hideSelectionUi();
+  });
+  document.getElementById('cancelSelectionNoteBtn').addEventListener('click', () => {
+    hideSelectionUi();
+  });
+  document.getElementById('resetRecapBtn').addEventListener('click', () => {
+    state.recap = defaultRecap;
+    saveState();
+    hydrateNotes();
+  });
+
+  document.getElementById('rewriteSurface').addEventListener('input', (event) => {
+    state.recap = event.currentTarget.textContent;
+    saveState();
+  });
+
+  document.getElementById('questionsNote').addEventListener('input', (event) => {
+    state.questions = event.currentTarget.value;
+    saveState();
+  });
+
+  document.getElementById('nextActionsNote').addEventListener('input', (event) => {
+    state.nextActions = event.currentTarget.value;
+    saveState();
+  });
+
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    document.getElementById('toc').classList.toggle('open');
+  });
+
+  document.addEventListener('mouseup', (event) => {
+    if (event.target.closest('input, textarea, button, [contenteditable="true"]')) {
+      return;
+    }
+    const data = selectionData();
+    if (!data) {
+      return;
+    }
+    showSelectionMenuAt(data.x, data.y - 8);
+  });
+
+  document.addEventListener('contextmenu', (event) => {
+    if (event.target.closest('input, textarea, [contenteditable="true"]')) {
+      return;
+    }
+    const data = selectionData();
+    if (!data) {
+      hideSelectionUi();
+      return;
+    }
+    event.preventDefault();
+    selectionDraft = data;
+    showSelectionMenuAt(event.clientX, event.clientY);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      hideSelectionUi();
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-action], [data-filter]');
+    const clickedInsideSelectionUi = event.target.closest('#selectionMenu, #selectionEditor');
+    if (!trigger) {
+      if (!clickedInsideSelectionUi) {
+        hideSelectionMenu();
+      }
+      return;
+    }
+
+    if (trigger.dataset.filter) {
+      currentFilter = trigger.dataset.filter;
+      renderFilters();
+      renderDeliverables();
+      return;
+    }
+
+    const action = trigger.dataset.action;
+    if (action === 'open-file' || action === 'open-folder') {
+      openPath('vscode', trigger.dataset.path);
+      return;
+    }
+    if (action === 'open-file-system') {
+      openPath('file', trigger.dataset.path);
+      return;
+    }
+    if (action === 'copy-path') {
+      copyText(trigger.dataset.path, trigger);
+      return;
+    }
+    if (action === 'copy-command') {
+      copyText(trigger.dataset.command, trigger);
+      return;
+    }
+    if (action === 'pin') {
+      togglePin(trigger.dataset.id);
+      return;
+    }
+    if (action === 'selection-add-note') {
+      showSelectionEditor();
+      return;
+    }
+    if (action === 'selection-save-highlight') {
+      addHighlightFromSelection();
+      return;
+    }
+    if (action === 'delete-highlight') {
+      state.highlights = state.highlights.filter(item => item.id !== trigger.dataset.id);
+      saveState();
+      renderHighlights();
+      return;
+    }
+  });
+
+  document.addEventListener('input', (event) => {
+    const target = event.target;
+    if (target.matches('[data-action="update-highlight-note"]')) {
+      const highlight = state.highlights.find(item => item.id === target.dataset.id);
+      if (!highlight) return;
+      highlight.note = target.value;
+      saveState();
+    }
+  });
+
+  const sections = Array.from(document.querySelectorAll('.section'));
+  const links = Array.from(document.querySelectorAll('.toc-list a'));
+  const observer = new IntersectionObserver((entries) => {
+    const visible = entries.filter(entry => entry.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+    if (!visible) return;
+    links.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + visible.target.id));
+  }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+  sections.forEach(section => observer.observe(section));
+
+  links.forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('toc').classList.remove('open');
+    });
+  });
+}
+
+function init() {
+  if (isHostedCopy) {
+    document.body.classList.add('hosted-copy');
+  }
+  setTheme(state.theme);
+  updateStats();
+  renderFilters();
+  renderDeliverables();
+  renderPending();
+  renderLaunchpad();
+  renderCommands();
+  hydrateNotes();
+  renderPinned();
+  renderHighlights();
+  bindEvents();
+}
+
+init();
+</script>
+</body>
+</html>
