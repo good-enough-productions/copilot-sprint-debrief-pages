@@ -1,6 +1,8 @@
 # Copilot Sprint Debrief Site
 
-Minimal GitHub Pages site for the sprint debrief artifact.
+Public-safe GitHub Pages site for the Copilot sprint debrief artifact.
+
+**Live Site:** [good-enough-productions.github.io/copilot-sprint-debrief-pages](https://good-enough-productions.github.io/copilot-sprint-debrief-pages/)
 
 ## Contents
 
